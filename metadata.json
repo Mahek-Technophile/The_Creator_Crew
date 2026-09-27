@@ -1,0 +1,8 @@
+{
+  "name": "The Creator Crew",
+  "description": "AI-Powered Content Creation Assistant — smart keyboard caption generator, Draft Vault, Style Memory Engine, Smart Scheduler, and Attention Span Optimizer.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
