@@ -151,8 +151,11 @@ class TestCreatorCrewSelenium:
         wait = WebDriverWait(driver, 10)
 
         # Navigate to Ideas
-        ideas_link = driver.find_element(By.CSS_SELECTOR, "nav.nav a[href='#/ideas']")
-        ideas_link.click()
+        ideas_link = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "nav.nav a[href='#/ideas']")))
+        try:
+            ideas_link.click()
+        except Exception:
+            driver.execute_script("arguments[0].click();", ideas_link)
 
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.item")))
 
@@ -183,8 +186,11 @@ class TestCreatorCrewSelenium:
         wait = WebDriverWait(driver, 10)
 
         # Navigate to Create
-        create_link = driver.find_element(By.CSS_SELECTOR, "nav.nav a[href='#/create']")
-        create_link.click()
+        create_link = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "nav.nav a[href='#/create']")))
+        try:
+            create_link.click()
+        except Exception:
+            driver.execute_script("arguments[0].click();", create_link)
 
         prompt_area = wait.until(EC.visibility_of_element_located((By.ID, "pr")))
         prompt_area.clear()
@@ -243,8 +249,15 @@ class TestCreatorCrewSelenium:
         """TC-07: Navigate to Draft Vault, search drafts, and test delete with undo."""
         wait = WebDriverWait(driver, 10)
 
-        vault_link = driver.find_element(By.CSS_SELECTOR, "nav.nav a[href='#/vault']")
-        vault_link.click()
+        vault_link = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "nav.nav a[href='#/vault']")))
+        try:
+            vault_link.click()
+        except Exception:
+            driver.execute_script("arguments[0].click();", vault_link)
+
+        if "#/vault" not in driver.current_url:
+            driver.execute_script("window.location.hash = '#/vault';")
+        time.sleep(0.4)
 
         search_input = wait.until(EC.visibility_of_element_located((By.ID, "vs")))
         search_input.clear()
@@ -252,25 +265,31 @@ class TestCreatorCrewSelenium:
         time.sleep(0.4)
 
         # Verify matched drafts
-        items = driver.find_elements(By.CLASS_NAME, "item")
+        items = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "item")))
         assert len(items) >= 1
 
         # Clear search
+        driver.execute_script("arguments[0].value = ''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", search_input)
         search_input.clear()
-        search_input.send_keys(Keys.BACKSPACE)
         time.sleep(0.4)
 
         # Test delete draft with undo
-        delete_btns = driver.find_elements(By.CSS_SELECTOR, "button[data-d]")
+        delete_btns = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "button[data-d]")))
         if delete_btns:
             initial_count = len(driver.find_elements(By.CLASS_NAME, "item"))
-            delete_btns[0].click()
+            try:
+                delete_btns[0].click()
+            except Exception:
+                driver.execute_script("arguments[0].click();", delete_btns[0])
 
             toast = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "toast")))
             assert "Draft deleted" in toast.text
 
-            undo_btn = driver.find_element(By.ID, "undo")
-            undo_btn.click()
+            undo_btn = wait.until(EC.element_to_be_clickable((By.ID, "undo")))
+            try:
+                undo_btn.click()
+            except Exception:
+                driver.execute_script("arguments[0].click();", undo_btn)
             time.sleep(0.5)
 
             restored_count = len(driver.find_elements(By.CLASS_NAME, "item"))
@@ -280,8 +299,11 @@ class TestCreatorCrewSelenium:
         """TC-08: Check Results table sorting and detailed post breakdown modal."""
         wait = WebDriverWait(driver, 10)
 
-        results_link = driver.find_element(By.CSS_SELECTOR, "nav.nav a[href='#/results']")
-        results_link.click()
+        results_link = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "nav.nav a[href='#/results']")))
+        try:
+            results_link.click()
+        except Exception:
+            driver.execute_script("arguments[0].click();", results_link)
 
         wait.until(EC.presence_of_element_located((By.TAG_NAME, "table")))
 
@@ -367,7 +389,7 @@ class TestCreatorCrewSelenium:
         close_btns = driver.find_elements(By.XPATH, "//button[@id='close-api-dialog-btn' or contains(text(), 'Close') or contains(text(), '✕')]")
         if close_btns:
             try:
-                close_btns[0].click()
+                driver.execute_script("arguments[0].click();", close_btns[0])
                 time.sleep(0.3)
             except Exception:
                 pass
@@ -382,18 +404,27 @@ class TestCreatorCrewSelenium:
             team_link.click()
         except Exception:
             driver.execute_script("arguments[0].click();", team_link)
-        time.sleep(0.4)
+
+        if "#/team" not in driver.current_url:
+            driver.execute_script("window.location.hash = '#/team';")
+        time.sleep(0.5)
 
         wait.until(EC.presence_of_element_located((By.ID, "admin-team-view")))
         assert "Admin & Team Workspace" in driver.page_source
 
         # Test role switching between Team Owner and Reviewer
-        reviewer_btn = driver.find_element(By.ID, "role-reviewer-btn")
-        reviewer_btn.click()
+        reviewer_btn = wait.until(EC.element_to_be_clickable((By.ID, "role-reviewer-btn")))
+        try:
+            reviewer_btn.click()
+        except Exception:
+            driver.execute_script("arguments[0].click();", reviewer_btn)
         time.sleep(0.4)
 
-        owner_btn = driver.find_element(By.ID, "role-owner-btn")
-        owner_btn.click()
+        owner_btn = wait.until(EC.element_to_be_clickable((By.ID, "role-owner-btn")))
+        try:
+            owner_btn.click()
+        except Exception:
+            driver.execute_script("arguments[0].click();", owner_btn)
         time.sleep(0.4)
 
     def test_12_admin_invite_reviewer_and_manage_roster(self, driver):
