@@ -1,4 +1,4 @@
-export type ToneType = 'Funny' | 'Professional' | 'Aesthetic' | 'Inspirational' | 'Viral Hook';
+export type ToneType = 'Funny' | 'Professional' | 'Aesthetic' | 'Motivational' | 'Inspirational' | 'Viral Hook';
 
 export type PlatformType = 'instagram' | 'tiktok' | 'youtube';
 
