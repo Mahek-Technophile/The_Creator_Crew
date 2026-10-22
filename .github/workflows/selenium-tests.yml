@@ -20,22 +20,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: Install Frontend Dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build and Start Application Server
         run: |
           npm run build
           npm run preview -- --port 3000 &
-          npx wait-on http://localhost:3000 --timeout 60000
+          npx --yes wait-on http://localhost:3000 --timeout 60000
 
       - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          cache: 'pip'
 
       - name: Install Python Selenium & Pytest
         run: |
@@ -53,7 +51,6 @@ jobs:
           HEADLESS: "true"
         run: |
           pytest tests/test_creator_crew_selenium.py -v --headless --html=report.html --self-contained-html
-
 
       - name: Upload Test Report Artifact
         if: always()
