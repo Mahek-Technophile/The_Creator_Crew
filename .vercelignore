@@ -1,0 +1,7 @@
+tests/
+backend/
+venv/
+.pytest_cache/
+report.html
+The Creator Crew - Pitch Deck.pdf
+reference_zip/

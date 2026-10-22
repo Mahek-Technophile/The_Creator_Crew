@@ -127,14 +127,27 @@ export const ApiKeyDialog: React.FC<ApiKeyDialogProps> = ({ isOpen, onClose, onK
           <div className="flex items-center justify-end gap-2 pt-3 border-t border-[var(--line)]">
             <button
               type="button"
+              id="close-api-dialog-btn"
+              onClick={onClose}
+              className="btn ghost small"
+            >
+              Close
+            </button>
+            <button
+              type="button"
               onClick={handleTest}
               disabled={isTesting || !apiKeyInput.trim()}
               className="btn ghost small"
             >
               {isTesting ? 'Testing connection…' : 'Test API Key'}
             </button>
-            <button type="button" onClick={handleSave} className="btn small">
-              Save Configuration
+            <button
+              type="button"
+              id="save-key-btn"
+              onClick={handleSave}
+              className="btn small"
+            >
+              Save Key
             </button>
           </div>
         </div>

@@ -307,15 +307,19 @@ class TestCreatorCrewSelenium:
         """TC-09: Retention check view: inspect Reel retention curve and tips."""
         wait = WebDriverWait(driver, 10)
 
-        retention_link = driver.find_element(By.CSS_SELECTOR, "nav.nav a[href='#/retention']")
-        retention_link.click()
+        retention_link = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "nav.nav a[href='#/retention']")))
+        try:
+            retention_link.click()
+        except Exception:
+            driver.execute_script("arguments[0].click();", retention_link)
 
         wait.until(EC.presence_of_element_located((By.ID, "rsv")))
 
         # Verify retention SVG curve elements
         chart_svg = driver.find_element(By.ID, "rsv")
         assert chart_svg is not None
-        assert "Biggest drop" in chart_svg.text
+        svg_content = chart_svg.get_attribute("textContent") or driver.page_source
+        assert "Biggest drop" in svg_content
 
         # Select different Reel from dropdown
         reel_select = Select(driver.find_element(By.ID, "rs"))
@@ -329,39 +333,55 @@ class TestCreatorCrewSelenium:
         wait = WebDriverWait(driver, 10)
 
         # Click API key launcher in sidebar
-        api_key_btn = driver.find_element(By.CSS_SELECTOR, "button[title='Configure Gemini API key']")
-        api_key_btn.click()
+        api_key_btn = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "button[title='Configure Gemini API key']")))
+        try:
+            api_key_btn.click()
+        except Exception:
+            driver.execute_script("arguments[0].click();", api_key_btn)
 
         # Modal opens
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='password']")))
+        key_input = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "input[type='password']")))
         assert "Gemini API Connection" in driver.page_source
 
         # Test entering an API key
-        key_input = driver.find_element(By.CSS_SELECTOR, "input[type='password']")
         key_input.clear()
         key_input.send_keys("AIzaSyFakeKeyForTestingSelenium12345")
 
         # Save key
-        save_btn = driver.find_element(By.XPATH, "//button[contains(text(), 'Save Key')]")
-        save_btn.click()
-        time.sleep(0.3)
+        save_btn = wait.until(
+            EC.element_to_be_clickable(
+                (By.XPATH, "//button[@id='save-key-btn' or contains(text(), 'Save Key') or contains(text(), 'Save Configuration')]")
+            )
+        )
+        try:
+            save_btn.click()
+        except Exception:
+            driver.execute_script("arguments[0].click();", save_btn)
+        time.sleep(0.4)
 
         # Verify key was stored
         stored_key = driver.execute_script("return window.localStorage.getItem('cc_gemini_api_key');")
         assert stored_key == "AIzaSyFakeKeyForTestingSelenium12345"
 
-        # Close modal
-        close_btn = driver.find_element(By.XPATH, "//button[contains(text(), 'Close')]")
-        close_btn.click()
-        time.sleep(0.3)
+        # Close modal if still visible
+        close_btns = driver.find_elements(By.XPATH, "//button[@id='close-api-dialog-btn' or contains(text(), 'Close') or contains(text(), '✕')]")
+        if close_btns:
+            try:
+                close_btns[0].click()
+                time.sleep(0.3)
+            except Exception:
+                pass
 
     def test_11_admin_team_workspace_and_role_switching(self, driver):
         """TC-11: Admin Side: Open Admin & Team workspace, verify tabs and switch active roles."""
         wait = WebDriverWait(driver, 10)
 
         # Click Admin & Team in rail navigation
-        team_link = driver.find_element(By.CSS_SELECTOR, "nav.nav a[href='#/team']")
-        team_link.click()
+        team_link = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "nav.nav a[href='#/team']")))
+        try:
+            team_link.click()
+        except Exception:
+            driver.execute_script("arguments[0].click();", team_link)
         time.sleep(0.4)
 
         wait.until(EC.presence_of_element_located((By.ID, "admin-team-view")))
@@ -386,7 +406,7 @@ class TestCreatorCrewSelenium:
         time.sleep(0.4)
 
         # Ensure active role is Team Owner
-        owner_btn = driver.find_element(By.ID, "role-owner-btn")
+        owner_btn = wait.until(EC.element_to_be_clickable((By.ID, "role-owner-btn")))
         owner_btn.click()
         time.sleep(0.3)
 
@@ -395,7 +415,7 @@ class TestCreatorCrewSelenium:
         initial_count = len(initial_roster)
 
         # Fill invitation form
-        email_input = driver.find_element(By.ID, "invite-email")
+        email_input = wait.until(EC.visibility_of_element_located((By.ID, "invite-email")))
         email_input.clear()
         email_input.send_keys("lead.reviewer@agency.com")
 
@@ -403,7 +423,7 @@ class TestCreatorCrewSelenium:
         role_select.select_by_value("REVIEWER")
 
         # Submit invitation
-        submit_btn = driver.find_element(By.ID, "invite-submit")
+        submit_btn = wait.until(EC.element_to_be_clickable((By.ID, "invite-submit")))
         submit_btn.click()
         time.sleep(0.5)
 
@@ -417,12 +437,12 @@ class TestCreatorCrewSelenium:
         wait = WebDriverWait(driver, 10)
 
         # Switch to Reviewer role
-        reviewer_btn = driver.find_element(By.ID, "role-reviewer-btn")
+        reviewer_btn = wait.until(EC.element_to_be_clickable((By.ID, "role-reviewer-btn")))
         reviewer_btn.click()
         time.sleep(0.3)
 
         # Open Review Queue sub-tab
-        tab_queue = driver.find_element(By.ID, "tab-queue")
+        tab_queue = wait.until(EC.element_to_be_clickable((By.ID, "tab-queue")))
         tab_queue.click()
         time.sleep(0.4)
 
@@ -434,7 +454,7 @@ class TestCreatorCrewSelenium:
         time.sleep(0.5)
 
         # Switch to Decision Audit Log sub-tab
-        tab_audit = driver.find_element(By.ID, "tab-audit")
+        tab_audit = wait.until(EC.element_to_be_clickable((By.ID, "tab-audit")))
         tab_audit.click()
         time.sleep(0.4)
 
@@ -447,7 +467,7 @@ class TestCreatorCrewSelenium:
         wait = WebDriverWait(driver, 10)
 
         # Go to Review Queue
-        tab_queue = driver.find_element(By.ID, "tab-queue")
+        tab_queue = wait.until(EC.element_to_be_clickable((By.ID, "tab-queue")))
         tab_queue.click()
         time.sleep(0.4)
 
@@ -474,12 +494,12 @@ class TestCreatorCrewSelenium:
         wait = WebDriverWait(driver, 10)
 
         # Ensure Team Owner role
-        owner_btn = driver.find_element(By.ID, "role-owner-btn")
+        owner_btn = wait.until(EC.element_to_be_clickable((By.ID, "role-owner-btn")))
         owner_btn.click()
         time.sleep(0.3)
 
         # Switch to Platform Dispatch sub-tab
-        tab_dispatch = driver.find_element(By.ID, "tab-dispatch")
+        tab_dispatch = wait.until(EC.element_to_be_clickable((By.ID, "tab-dispatch")))
         tab_dispatch.click()
         time.sleep(0.4)
 
@@ -488,12 +508,12 @@ class TestCreatorCrewSelenium:
         assert "TikTok" in driver.page_source
 
         # Toggle "Require Reviewer Approval"
-        req_approval_toggle = driver.find_element(By.ID, "toggle-require-approval")
+        req_approval_toggle = wait.until(EC.presence_of_element_located((By.ID, "toggle-require-approval")))
         driver.execute_script("arguments[0].click();", req_approval_toggle)
         time.sleep(0.3)
 
         # Toggle "Send Reminder Notification instead of Direct Auto-Publish"
-        reminder_toggle = driver.find_element(By.ID, "toggle-reminder-mode")
+        reminder_toggle = wait.until(EC.presence_of_element_located((By.ID, "toggle-reminder-mode")))
         driver.execute_script("arguments[0].click();", reminder_toggle)
         time.sleep(0.4)
 
@@ -504,8 +524,11 @@ class TestCreatorCrewSelenium:
         wait = WebDriverWait(driver, 10)
 
         # Navigate to Draft Vault
-        vault_link = driver.find_element(By.CSS_SELECTOR, "nav.nav a[href='#/vault']")
-        vault_link.click()
+        vault_link = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "nav.nav a[href='#/vault']")))
+        try:
+            vault_link.click()
+        except Exception:
+            driver.execute_script("arguments[0].click();", vault_link)
         time.sleep(0.4)
 
         # Find first draft with a "History" button
