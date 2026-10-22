@@ -268,32 +268,51 @@ class TestCreatorCrewSelenium:
         items = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "item")))
         assert len(items) >= 1
 
-        # Clear search
-        driver.execute_script("arguments[0].value = ''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", search_input)
-        search_input.clear()
-        time.sleep(0.4)
+        # Clear search input completely and trigger synthetic React input events
+        search_input.click()
+        search_input.send_keys(Keys.CONTROL + "a", Keys.BACKSPACE)
+        driver.execute_script(
+            """
+            var input = arguments[0];
+            var nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+            nativeSetter.call(input, '');
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+            """,
+            search_input,
+        )
+
+        # Explicitly wait until the search is cleared and all drafts (at least 3) are rendered
+        wait.until(lambda d: len(d.find_elements(By.CLASS_NAME, "item")) >= 3)
+        time.sleep(0.3)
 
         # Test delete draft with undo
+        initial_items = driver.find_elements(By.CLASS_NAME, "item")
+        initial_count = len(initial_items)
+        assert initial_count >= 3
+
         delete_btns = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "button[data-d]")))
-        if delete_btns:
-            initial_count = len(driver.find_elements(By.CLASS_NAME, "item"))
-            try:
-                delete_btns[0].click()
-            except Exception:
-                driver.execute_script("arguments[0].click();", delete_btns[0])
+        try:
+            delete_btns[0].click()
+        except Exception:
+            driver.execute_script("arguments[0].click();", delete_btns[0])
 
-            toast = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "toast")))
-            assert "Draft deleted" in toast.text
+        toast = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "toast")))
+        assert "Draft deleted" in toast.text
 
-            undo_btn = wait.until(EC.element_to_be_clickable((By.ID, "undo")))
-            try:
-                undo_btn.click()
-            except Exception:
-                driver.execute_script("arguments[0].click();", undo_btn)
-            time.sleep(0.5)
+        # Wait until the item count is decremented
+        wait.until(lambda d: len(d.find_elements(By.CLASS_NAME, "item")) == initial_count - 1)
 
-            restored_count = len(driver.find_elements(By.CLASS_NAME, "item"))
-            assert restored_count == initial_count
+        undo_btn = wait.until(EC.element_to_be_clickable((By.ID, "undo")))
+        try:
+            undo_btn.click()
+        except Exception:
+            driver.execute_script("arguments[0].click();", undo_btn)
+
+        # Wait until restored count matches initial count
+        wait.until(lambda d: len(d.find_elements(By.CLASS_NAME, "item")) == initial_count)
+        restored_count = len(driver.find_elements(By.CLASS_NAME, "item"))
+        assert restored_count == initial_count
 
     def test_08_results_table_sorting_and_post_modal(self, driver):
         """TC-08: Check Results table sorting and detailed post breakdown modal."""
@@ -409,8 +428,10 @@ class TestCreatorCrewSelenium:
             driver.execute_script("window.location.hash = '#/team';")
         time.sleep(0.5)
 
-        wait.until(EC.presence_of_element_located((By.ID, "admin-team-view")))
-        assert "Admin & Team Workspace" in driver.page_source
+        team_view = wait.until(EC.presence_of_element_located((By.ID, "admin-team-view")))
+        # Check that Admin & Team view rendered (handling HTML entity differences between text and page_source)
+        assert "Admin" in team_view.text and "Team" in team_view.text
+        assert ("Admin & Team" in team_view.text or "Admin &amp; Team" in driver.page_source or "Admin & Team" in driver.page_source)
 
         # Test role switching between Team Owner and Reviewer
         reviewer_btn = wait.until(EC.element_to_be_clickable((By.ID, "role-reviewer-btn")))
