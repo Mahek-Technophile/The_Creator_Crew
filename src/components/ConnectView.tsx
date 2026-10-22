@@ -139,6 +139,17 @@ export const ConnectView: React.FC<ConnectViewProps> = ({ onConnected }) => {
         <p className="muted small" style={{ marginTop: '16px' }}>
           Needs a Business or Creator account. Switching is free and keeps your followers.
         </p>
+
+        <div className="pt-3 border-t border-[#D5D8D3]/60 mt-4">
+          <a
+            href="#/qa"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-[#D5D8D3] hover:border-black text-xs font-bold text-[#16202A] shadow-xs transition-all"
+          >
+            <span>🧪</span>
+            <span>View Selenium QA Test Matrix & Live Simulator (16 Tests)</span>
+            <span className="font-mono text-[10px] bg-[#FFD43B] px-1.5 py-0.5 rounded ml-1">NEW</span>
+          </a>
+        </div>
       </div>
 
       {/* Permissions Dialog */}

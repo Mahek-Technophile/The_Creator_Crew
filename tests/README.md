@@ -2,33 +2,74 @@
 
 This directory contains the automated end-to-end Selenium test suite for **The Creator Crew**, mapped directly to the **Use Case Diagram** (`image_f7ffa868.png`).
 
-## Prerequisites
-- Python 3.8+
-- Google Chrome browser (or Chromium)
-- Node.js dev server running on port 3000 (`npm run dev`) or live deployed URL
+[![Selenium E2E Test Suite](https://github.com/your-username/the-creator-crew/actions/workflows/selenium-tests.yml/badge.svg)](https://github.com/your-username/the-creator-crew/actions/workflows/selenium-tests.yml)
 
-## Setup
-Install Python testing dependencies:
+---
+
+## 4 Ways to Showcase These Tests
+
+### Method 1: In-App Interactive QA Matrix & Live Simulator (Zero Installation)
+The web application includes a built-in **QA Test Matrix & Live Simulator** tab accessible at `#/qa`:
+- Anyone opening the app can click the **"QA Test Matrix"** tab (with badge `16`).
+- **Interactive live simulation**: Click **"Run Live Simulation"** to step through all 16 tests in real time with assertion checklists, timing benchmarks, and terminal logs.
+- **Python source inspector**: View and copy the exact Python Selenium code snippet for every test case.
+- **1-Click HTML Report Export**: Click **"Export HTML Report"** to download a standalone `.html` test report file.
+
+---
+
+### Method 2: Live Headed Visual Demo (Best for Loom recordings & screen shares)
+To showcase the actual automated browser in action (where Google Chrome physically opens on screen, navigates pages, types captions, and clicks buttons automatically):
+
+#### 1. Install dependencies:
 ```bash
 pip install -r tests/requirements.txt
 ```
 
-## Running the Tests
-To execute all test cases in headless Chrome:
+#### 2. Run in headed mode (with live stdout output):
 ```bash
-pytest tests/test_creator_crew_selenium.py -v
+pytest tests/test_creator_crew_selenium.py -v -s
 ```
 
-To run against a deployed Vercel URL:
+#### What spectators see:
+- Chrome opens at `http://localhost:3000` (or your deployed URL).
+- Toggles permissions and connects the film slate.
+- Navigates through the Today dashboard, Ideas filter chips, and Gemini caption generator.
+- Switches to the Admin & Team Workspace, invites a Reviewer, approves a draft, submits rework feedback, and executes a draft version rollback.
+
+#### Cinematic Spotlight Runner (Tailored for Loom):
+For an enhanced visual recording experience with glowing element spotlights and human-paced typing:
 ```bash
-APP_URL=https://your-deployment.vercel.app pytest tests/test_creator_crew_selenium.py -v
+python tests/run_visual_demo.py
+```
+
+---
+
+### Method 3: Standalone HTML Pytest Report (Self-Contained)
+Generate an HTML report that can be opened in any web browser or emailed to stakeholders:
+```bash
+pytest tests/test_creator_crew_selenium.py -v --headless --html=report.html --self-contained-html
+```
+- Open `report.html` in Chrome/Safari/Firefox to view passing status, execution timings, and metadata.
+
+---
+
+### Method 4: Automated GitHub Actions CI/CD Pipeline (Best for GitHub repositories)
+The file `.github/workflows/selenium-tests.yml` is pre-configured in your repository:
+- Runs automatically on every push or pull request to `main` / `master`.
+- Spins up an Ubuntu Linux runner with Node 20, Python 3.10, and Google Chrome.
+- Automatically executes all 16 Selenium tests and attaches `report.html` as a downloadable artifact.
+- Provides a green "Passing" build badge on your repository.
+
+#### GitHub README Badge Markdown:
+```markdown
+[![Selenium E2E Test Suite](https://github.com/<OWNER>/<REPO>/actions/workflows/selenium-tests.yml/badge.svg)](https://github.com/<OWNER>/<REPO>/actions/workflows/selenium-tests.yml)
 ```
 
 ---
 
 ## Test Cases Breakdown by Actor & Role
 
-The test suite now encompasses **16 test cases** categorized across the actors identified in the Use Case Diagram:
+The test suite encompasses **16 test cases** categorized across all actors identified in the Use Case Diagram:
 
 | # | Test Identifier | Actor / Role | Use Case Diagram Reference |
 |---|----------------|--------------|---------------------------|
@@ -48,8 +89,6 @@ The test suite now encompasses **16 test cases** categorized across the actors i
 | **TC-14** | `test_14_editorial_review_request_rework` | **Reviewer** | **Review Draft (Request Rework)** with Custom Editorial Feedback |
 | **TC-15** | `test_15_platform_dispatch_and_reminder_controls` | **Admin / Owner** | **Publish Post** (`<<extend>>` **Send Reminder Notification**) |
 | **TC-16** | `test_16_draft_versioning_and_revert_history` | **Creator / Admin** | **Search / Revert Draft Versions** (Version History Stack & 1-Click Rollback) |
-
----
 
 ### Actor Summary:
 1. **Creator Side (End-User)**: 9 Use Cases (`TC-01` through `TC-09`)

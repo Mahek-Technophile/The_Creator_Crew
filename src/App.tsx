@@ -16,6 +16,7 @@ import { VaultView } from './components/VaultView';
 import { ResultsView } from './components/ResultsView';
 import { RetentionView } from './components/RetentionView';
 import { AdminTeamView } from './components/AdminTeamView';
+import { QaShowcaseView } from './components/QaShowcaseView';
 import { ScheduleModal } from './components/ScheduleModal';
 import { ApiKeyDialog } from './components/ApiKeyDialog';
 
@@ -156,7 +157,7 @@ export function App() {
         )}
       </div>
 
-      {!state.connected ? (
+      {!state.connected && currentTab !== 'qa' ? (
         <ConnectView onConnected={handleConnected} />
       ) : (
         <>
@@ -255,6 +256,8 @@ export function App() {
                     onShowToast={showToast}
                   />
                 )}
+
+                {currentTab === 'qa' && <QaShowcaseView />}
               </div>
             </main>
           </div>

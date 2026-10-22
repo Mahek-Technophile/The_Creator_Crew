@@ -25,22 +25,43 @@ BASE_URL = os.environ.get("APP_URL", "http://localhost:3000")
 
 
 @pytest.fixture(scope="module")
-def driver():
-    """Setup headless Chrome WebDriver for test execution."""
+def driver(request):
+    """Setup Chrome WebDriver for test execution (headed by default for live visual demo, headless for CI)."""
+    is_headless = False
+    try:
+        is_headless = request.config.getoption("--headless")
+    except Exception:
+        pass
+    if not is_headless:
+        is_headless = os.environ.get("HEADLESS", "false").lower() in ("true", "1", "yes")
+
     chrome_options = ChromeOptions()
-    chrome_options.add_argument("--headless=new")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-gpu")
+    if is_headless:
+        chrome_options.add_argument("--headless=new")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
+    else:
+        # In headed demo mode, maximize window and suppress browser alerts
+        chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument("--disable-notifications")
+
     chrome_options.add_argument("--window-size=1440,900")
 
     service = ChromeService(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
     driver.implicitly_wait(6)
 
+    try:
+        slowmo = float(request.config.getoption("--slowmo"))
+    except Exception:
+        slowmo = float(os.environ.get("SLOWMO", "0.2"))
+    setattr(driver, "_slowmo", slowmo)
+
     yield driver
 
     driver.quit()
+
 
 
 class TestCreatorCrewSelenium:

@@ -2,7 +2,7 @@ import React from 'react';
 import { creatorData } from '../services/creatorData';
 import { Key } from 'lucide-react';
 
-export type NavTab = 'today' | 'ideas' | 'create' | 'calendar' | 'vault' | 'results' | 'retention' | 'team';
+export type NavTab = 'today' | 'ideas' | 'create' | 'calendar' | 'vault' | 'results' | 'retention' | 'team' | 'qa';
 
 interface SidebarProps {
   currentTab: NavTab;
@@ -12,7 +12,7 @@ interface SidebarProps {
   hasApiKey: boolean;
 }
 
-export const NAV_ITEMS: { id: NavTab; label: string }[] = [
+export const NAV_ITEMS: { id: NavTab; label: string; badge?: string }[] = [
   { id: 'today', label: 'Today' },
   { id: 'ideas', label: 'Ideas' },
   { id: 'create', label: 'Create' },
@@ -21,6 +21,7 @@ export const NAV_ITEMS: { id: NavTab; label: string }[] = [
   { id: 'results', label: 'Results' },
   { id: 'retention', label: 'Retention check' },
   { id: 'team', label: 'Admin & Team' },
+  { id: 'qa', label: 'QA Test Matrix', badge: '16' },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -49,8 +50,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
               onSelectTab(item.id);
             }}
             aria-current={currentTab === item.id ? 'page' : undefined}
+            className="flex items-center justify-between"
           >
-            {item.label}
+            <span>{item.label}</span>
+            {item.badge && (
+              <span className="ml-auto text-[10px] bg-[#FFD43B] text-[#16202A] px-1.5 py-0.5 rounded font-mono font-bold leading-none">
+                {item.badge}
+              </span>
+            )}
           </a>
         ))}
       </nav>
