@@ -27,21 +27,21 @@ export const VaultView: React.FC<VaultViewProps> = ({
   });
 
   const handleDelete = (id: number) => {
-    const draftIndex = state.drafts.findIndex((x) => x.id === id);
+    const draftIndex = state.drafts.findIndex((x) => String(x.id) === String(id));
     if (draftIndex < 0) return;
 
     const removedDraft = state.drafts[draftIndex];
-    const removedScheduled = state.schedule.filter((s) => s.draftId === id);
+    const removedScheduled = state.schedule.filter((s) => String(s.draftId) === String(id));
 
-    const newDrafts = state.drafts.filter((x) => x.id !== id);
-    const newSchedule = state.schedule.filter((s) => s.draftId !== id);
+    const newDrafts = state.drafts.filter((x) => String(x.id) !== String(id));
+    const newSchedule = state.schedule.filter((s) => String(s.draftId) !== String(id));
     const newState = { ...state, drafts: newDrafts, schedule: newSchedule };
 
     onUpdateState(newState);
     saveState(newState);
 
     onShowToast('Draft deleted', () => {
-      const restoredDrafts = [...state.drafts];
+      const restoredDrafts = [...newDrafts];
       restoredDrafts.splice(draftIndex, 0, removedDraft);
       const restoredSchedule = [...state.schedule, ...removedScheduled];
       const restoredState = {
@@ -124,6 +124,7 @@ export const VaultView: React.FC<VaultViewProps> = ({
         placeholder="Search your drafts by keyword or tag"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
+        onInput={(e) => setSearchQuery((e.target as HTMLInputElement).value)}
       />
 
       <div id="vl" style={{ marginTop: '16px' }}>

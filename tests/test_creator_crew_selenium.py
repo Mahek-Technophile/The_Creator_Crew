@@ -274,13 +274,20 @@ class TestCreatorCrewSelenium:
         driver.execute_script(
             """
             var input = arguments[0];
+            var lastValue = input.value;
             var nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
             nativeSetter.call(input, '');
+            if (input._valueTracker) {
+                input._valueTracker.setValue(lastValue);
+            }
             input.dispatchEvent(new Event('input', { bubbles: true }));
             input.dispatchEvent(new Event('change', { bubbles: true }));
             """,
             search_input,
         )
+        search_input.clear()
+        wait.until(lambda d: d.find_element(By.ID, "vs").get_attribute("value") == "")
+        time.sleep(0.3)
 
         # Explicitly wait until the search is cleared and all drafts (at least 3) are rendered
         wait.until(lambda d: len(d.find_elements(By.CLASS_NAME, "item")) >= 3)
@@ -292,16 +299,22 @@ class TestCreatorCrewSelenium:
         assert initial_count >= 3
 
         delete_btns = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "button[data-d]")))
+        target_btn = delete_btns[0]
+        deleted_id = target_btn.get_attribute("data-d")
+
         try:
-            delete_btns[0].click()
+            target_btn.click()
         except Exception:
-            driver.execute_script("arguments[0].click();", delete_btns[0])
+            driver.execute_script("arguments[0].click();", target_btn)
 
         toast = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "toast")))
         assert "Draft deleted" in toast.text
 
-        # Wait until the item count is decremented
-        wait.until(lambda d: len(d.find_elements(By.CLASS_NAME, "item")) == initial_count - 1)
+        # Wait until the target draft element is removed from DOM and item count is decremented
+        wait.until(
+            lambda d: len(d.find_elements(By.CSS_SELECTOR, f"button[data-d='{deleted_id}']")) == 0
+            and len(d.find_elements(By.CLASS_NAME, "item")) <= initial_count - 1
+        )
 
         undo_btn = wait.until(EC.element_to_be_clickable((By.ID, "undo")))
         try:
@@ -309,8 +322,11 @@ class TestCreatorCrewSelenium:
         except Exception:
             driver.execute_script("arguments[0].click();", undo_btn)
 
-        # Wait until restored count matches initial count
-        wait.until(lambda d: len(d.find_elements(By.CLASS_NAME, "item")) == initial_count)
+        # Wait until restored count matches initial count and target draft button is back
+        wait.until(
+            lambda d: len(d.find_elements(By.CSS_SELECTOR, f"button[data-d='{deleted_id}']")) > 0
+            and len(d.find_elements(By.CLASS_NAME, "item")) == initial_count
+        )
         restored_count = len(driver.find_elements(By.CLASS_NAME, "item"))
         assert restored_count == initial_count
 
