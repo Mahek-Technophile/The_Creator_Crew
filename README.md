@@ -3,7 +3,7 @@
 A full-stack web application designed for social media creators to generate on-brand captions and hooks, manage draft versions centrally, receive optimal posting time recommendations, schedule multi-channel distribution, predict audience attention drop-off, and close the performance loop.
 
 ---
-## Pitch Deck: The_Creator_Crew
+## Pitch Deck: [The_Creator_Crew](https://github.com/Mahek-Technophile/The_Creator_Crew/blob/main/The_Creator_Crew_SEM.pdf)
 
 
 ## 🏛️ System Architecture
