@@ -74,9 +74,10 @@ export function App() {
 
   useEffect(() => {
     if (!toastInfo) return;
+    // Keep undo actions available long enough for users and slower E2E runs.
     const timer = setTimeout(() => {
       setToastInfo(null);
-    }, 5000);
+    }, 15000);
     return () => clearTimeout(timer);
   }, [toastInfo]);
 
